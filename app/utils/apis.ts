@@ -1,19 +1,26 @@
-import { useAuthStore } from '../stores/auth';
+export const useApi = <T>(url: string, options?: any) => {
+  const { token, logout } = useAuth();
 
-export const api = $fetch.create({
-  onRequest({ options }) {
-    const authStore = useAuthStore();
-    if (authStore.token) {
-        const headers: HeadersInit = options.headers ? new Headers(options.headers) : new Headers();
-        headers.set('Authorization', `Bearer ${authStore.token}`);
-        options.headers = headers;
+  return $fetch<T>(url, {
+    ...options,
+    onRequest({ options }) {
+      if (token.value) {
+        options.headers = new Headers(options.headers);
+        options.headers.set('Authorization', `Bearer ${token.value}`);
+        console.log("✅ Authorization header attached.");
+      } else {
+        console.warn("⚠️ No token found, sending request without auth header.");
+      }
+    },
+
+    onResponseError({ response }) {
+      if (response.status === 401) {
+        console.error("❌ Received 401 Unauthorized. Logging out.");
+        logout();
+        if (process.client) {
+          navigateTo('/login', { replace: true });
+        }
+      }
     }
-  },
-  onResponseError({ response }) {
-    if (response.status === 401) {
-      const authStore = useAuthStore();
-      authStore.logout();
-      navigateTo('/login');
-    }
-  }
-});
+  });
+};

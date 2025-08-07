@@ -1,3 +1,9 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'blank',
+})
+</script>
+
 <template>  
     <v-container height="100vh" class="d-flex justify-center align-center">
         <v-row>

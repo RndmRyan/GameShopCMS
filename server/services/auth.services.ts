@@ -18,6 +18,14 @@ export async function verifyUser(email: string, password_raw: string) {
 }
 
 export async function verifyToken(token: string) {
-  const decoded = jwt.verify(token, process.env.jwt_string!);
+  const configs = useRuntimeConfig();
+  const decoded = jwt.verify(token, configs.public.jwt);
   return decoded;
+}
+
+export async function getUserById(id: string) {
+  const user = await db.query.cmsUsers.findFirst({
+    where: eq(cmsUsers.id, id),
+  });
+  return user;
 }

@@ -1,16 +1,20 @@
-import { useAuthStore } from '@/stores/auth'
-import { navigateTo, defineNuxtRouteMiddleware } from '#imports'
-
-export default defineNuxtRouteMiddleware((to, from) => {
-  if (!Client) return
-
-  const authStore = useAuthStore()
-
-  if (!authStore.isAuthenticated && to.path !== '/login') {
-    return navigateTo('/login')
+export default defineNuxtRouteMiddleware(async (to) => {
+  if (import.meta.client || to.path === '/login') {
+    return;
   }
 
-  if (authStore.isAuthenticated && to.path === '/login') {
-    return navigateTo('/')
+  const { isAuthenticated, fetchUserProfile } = useAuth();
+
+  if (!isAuthenticated.value) {
+    await fetchUserProfile();
   }
-})
+
+  if (!isAuthenticated.value) {
+    console.log('Middleware: User not authenticated. Redirecting to /login');
+    return navigateTo('/login', { replace: true });
+  }
+
+  if (isAuthenticated.value && to.path === '/login') {
+    return navigateTo('/', { replace: true });
+  }
+});

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { rules, setSuccessMessage, setErrorMessage } from '../composables/states';
+import { rules, setSuccessMessage, setErrorMessage } from '~/composables/states';
 import { ref } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { useAuth } from '../composables/useAuth';
 
 const email = ref('');
 const password = ref('');
@@ -10,36 +10,40 @@ const loading = ref(false);
 const showPassword = ref(false);
 const formIsValid = ref(false);
 
-const authStore = useAuthStore();
+const { login } = useAuth();
 const router = useRouter();
 
-const handleLogin = async () => {
+const submitForm = async () => {
+  if (!formIsValid.value) return;
+
   loading.value = true;
   error.value = null;
-  const success = await authStore.login({ email: email.value, password_raw: password.value });
-  console.log(success);
-  loading.value = false;
 
-  if (success) {
-    router.push('/');
-  } else {
-    error.value = 'Login failed. Please check your credentials.';
-  }
-};
-
-const submitForm = async () => {
   try {
-    await handleLogin();
+    const success = await login({ email: email.value, password_raw: password.value });
+
+    if (success) {
+      console.log('Login successful, navigating...');
+      setSuccessMessage('Logged in successfully!');
+      await router.push('/');
+    } else {
+      const credentialsError = 'Login failed. Please check your credentials.';
+      error.value = credentialsError;
+      setErrorMessage(credentialsError);
+    }
   } catch (err: any) {
-    setErrorMessage(err.message);
+    console.error("An exception occurred during login:", err);
+    error.value = err.message || 'An unexpected error occurred.';
+    setErrorMessage(error.value || 'An unexpected error occurred.');
+  } finally {
+    loading.value = false;
   }
-  setSuccessMessage('Logged in successfully');
 };
 </script>
 
 
 <template>
-    <v-form class="pa-10" v-model="formIsValid">
+    <v-form class="pa-10" v-model="formIsValid" @submit.prevent="submitForm">
         <v-row>
             <v-col cols="12">
                 <v-text-field label="Email" type="email" v-model="email" :rules="[rules.required, rules.email]"/>
@@ -53,6 +57,8 @@ const submitForm = async () => {
             label="Password" :rules="[rules.required]"/>
             </v-col>
         </v-row>
-        <v-btn type="submit" block class="mt-5 bg-secondary" @click="submitForm()">Login</v-btn>
+        <v-btn type="submit" block class="mt-5 bg-secondary" :disabled="loading || !formIsValid" :loading="loading">
+          {{ loading ? 'Logging in...' : 'Login' }}
+        </v-btn>
     </v-form>
 </template>

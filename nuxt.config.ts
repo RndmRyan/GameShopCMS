@@ -1,10 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  modules: [
-    'vuetify-nuxt-module',
-    '@pinia/nuxt'
-  ],
+  modules: [ 'vuetify-nuxt-module'  ],
   devtools: { enabled: true },
   nitro: {
     experimental: {
@@ -12,10 +9,10 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    nakama: process.env.nakamaDB_URL,
-    cms: process.env.cmsDB_URL,
+    nakama: '',
+    cms: '',
     public: {
-      jwt: process.env.jwt_string
+      jwt: ''
     }
   }
 })

@@ -1,7 +1,5 @@
 export const useThemeBackground = () => useState<string>('themeBackground', () => 'dark')
 
-export const useUser = () => useState<string>('userrole', () => 'Admin')
-
 export const rules = {
     required: (value: string) => !!value || 'Required.',
     username: (value: string) => {
@@ -35,10 +33,3 @@ export const setErrorMessage = (message: string) => {
         errorMessage.value = '';
     }, 1000);
 }
-
-export const useAuth = () => {
-    const isLoggedIn = useState('isLoggedIn', () => false);
-    const token = useState('token', () => '');
-    const role = useState('role', () => '');
-    return { isLoggedIn, token, role };
-};

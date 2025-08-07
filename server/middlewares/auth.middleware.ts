@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { config } from 'dotenv';
-config();
+
+var configs = useRuntimeConfig();
 
 export default defineEventHandler((event) => {
   // Define which API routes to protect
@@ -16,7 +16,7 @@ export default defineEventHandler((event) => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.jwt_string!);
+      const decoded = jwt.verify(token, configs.public.jwt);
       event.context.user = decoded; // Attach user info to the event context
     } catch (error) {
       throw createError({ statusCode: 401, message: 'Unauthorized: Invalid token' });
